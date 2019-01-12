@@ -396,10 +396,37 @@ class App:
 
             return new_android_rates, new_ios_rates, android_platform, ios_platform, new_android_volume, new_ios_volume
 
+    def check_USA_region(self):
+        # Exclude sources that are not relevant to result.
+        new_android_rates, new_ios_rates, android_platform, ios_platform, new_android_volume, new_ios_volume = self.check_CIS_region()
+        print("\n10) Будет ли продвижение в США? (да/нет)")
+
+        while True:
+            push = input("Ответ -> ").lower()
+
+            if push == "нет":
+                usa_sources = ("Twitter", "Snapchat", "Pinterest")
+                for key in usa_sources:
+                    if key in new_android_rates:
+                        new_android_rates.pop(key)
+                    else:
+                        pass
+                    if key in new_ios_rates:
+                        new_ios_rates.pop(key)
+                    else:
+                        pass
+            elif push == "да":
+                pass
+            else:
+                print("Похоже кто-то ошибся с ответом. Повторим? 😉")
+                continue
+
+            return new_android_rates, new_ios_rates, android_platform, ios_platform, new_android_volume, new_ios_volume
+
     def choose_tracker(self):
         # Correct sources if they are limited by tracking system.
-        new_android_rates, new_ios_rates, android_platform, ios_platform, new_android_volume, new_ios_volume = self.check_CIS_region()
-        print("\n10) Рекламодатель будет использовать треккинговую систему AppsFlyer, Adjust или Kochava? (да/нет)?")
+        new_android_rates, new_ios_rates, android_platform, ios_platform, new_android_volume, new_ios_volume = self.check_USA_region()
+        print("\n11) Рекламодатель будет использовать треккинговую систему AppsFlyer, Adjust или Kochava? (да/нет)?")
 
         while True:
             tracker = input("Ответ -> ").lower()
