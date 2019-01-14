@@ -370,7 +370,7 @@ class App:
                 continue
 
     def check_regions(self):
-        # Exclude sources that are not relevant to result.
+        # Exclude sources that are not relevant to targeting.
         new_android_rates, new_ios_rates, android_platform, ios_platform, new_android_volume, new_ios_volume = self.consider_season()
         print("\n9) Будет ли продвижение WW? (да/нет)")
 
@@ -567,16 +567,14 @@ class Landing:
                 if model == "1":
                     pass
                 elif model == "2":
-                    print(
-                        "Что ж, клиент хочет работать по CPA, тогда мне нужны данные по конверсии из перехода в целевое действие! (например, 15)")
-                    conversion = float(
-                        input("Процент конверсии -> ").replace(",", "."))/100
+                    print("Что ж, клиент хочет работать по CPA, тогда мне нужны данные по конверсии из перехода в целевое действие! (например, 15)")
+                    conversion = float(input("Процент конверсии -> ").replace(",", "."))/100
                     for key, value in new_landing_rates.items():
                         new_landing_rates[key] = round(
-                            (value * conversion), 2)
+                            (value / conversion), 2)
                     for key, value in new_landing_volume.items():
                         new_landing_volume[key] = round(
-                            (value * conversion), 2)
+                            (value / conversion), 2)
                 else:
                     print("Указанная модель – это точно одна из CPC или CPA?")
                     continue
@@ -641,19 +639,47 @@ class Landing:
                 print("Похоже кто-то ошибся с введенным значением. Повторим? 😉")
                 continue
 
-    def check_CIS_region(self):
-        # Exclude sources that are not relevant to result.
+    def check_regions(self):
+        # Exclude sources that are not relevant to targeting.
         new_landing_rates, new_landing_volume = self.consider_season()
-        print("\n6) Будет ли продвижение в странах СНГ? (да/нет)")
+        print("\n6) Будет ли продвижение WW? (да/нет)")
 
         while True:
-            push = input("Ответ -> ").lower()
+            worldwide = input("Ответ по WW -> ").lower()
 
-            if push == "нет":
-                cis_sources = ("myTarget", "Яндекс")
-                for key in cis_sources:
-                    new_landing_rates.pop(key)
-            elif push == "да":
+            if worldwide == "нет":
+
+                print("\nБудет ли продвижение в СНГ? (да/нет)")
+                cis = input("Ответ по СНГ -> ").lower()
+                if cis == "нет":
+                    cis_sources = ("myTarget", "Яндекс")
+                    for key in cis_sources:
+                        if key in new_landing_rates:
+                            new_landing_rates.pop(key)
+                        else:
+                            pass
+                elif cis == "да":
+                    pass
+                else:
+                    print("Похоже кто-то ошибся с ответом. Повторим? 😉")
+                    continue
+
+                print("\nБудет ли продвижение в США? (да/нет)")
+                usa = input("Ответ по США -> ").lower()
+                if usa == "нет":
+                    usa_sources = ("Twitter", "Snapchat", "Pinterest")
+                    for key in usa_sources:
+                        if key in new_landing_rates:
+                            new_landing_rates.pop(key)
+                        else:
+                            pass
+                elif usa == "да":
+                    pass
+                else:
+                    print("Похоже кто-то ошибся с ответом. Повторим? 😉")
+                    continue
+
+            elif worldwide == "да":
                 pass
             else:
                 print("Похоже кто-то ошибся с ответом. Повторим? 😉")
@@ -661,12 +687,9 @@ class Landing:
 
             return new_landing_rates, new_landing_volume
 
-    # def check_spend_amount():
-    #     # If amount doesn't require minimum limit then swith off source.
-
     def show_results(self):
         # This is the final step of estimation.
-        new_landing_rates, new_landing_volume = self.check_CIS_region()
+        new_landing_rates, new_landing_volume = self.check_regions()
         print("\n🏆  Моя рекомендация будет следующей: 🏆")
         print("\n--- Лендинг 📄  ---")
         budgets = {}
