@@ -369,53 +369,55 @@ class App:
                 print("Похоже кто-то ошибся с введенным значением. Повторим? 😉")
                 continue
 
-    def check_CIS_region(self):
+    def check_regions(self):
         # Exclude sources that are not relevant to result.
         new_android_rates, new_ios_rates, android_platform, ios_platform, new_android_volume, new_ios_volume = self.consider_season()
-        print("\n9) Будет ли продвижение в странах СНГ? (да/нет)")
+        print("\n9) Будет ли продвижение WW? (да/нет)")
 
         while True:
-            push = input("Ответ -> ").lower()
+            worldwide = input("Ответ по WW -> ").lower()
 
-            if push == "нет":
-                cis_sources = ("myTarget", "Яндекс")
-                for key in cis_sources:
-                    if key in new_android_rates:
-                        new_android_rates.pop(key)
-                    else:
-                        pass
-                    if key in new_ios_rates:
-                        new_ios_rates.pop(key)
-                    else:
-                        pass
-            elif push == "да":
-                pass
-            else:
-                print("Похоже кто-то ошибся с ответом. Повторим? 😉")
-                continue
+            if worldwide == "нет":
 
-            return new_android_rates, new_ios_rates, android_platform, ios_platform, new_android_volume, new_ios_volume
+                print("\nБудет ли продвижение в СНГ? (да/нет)")
+                cis = input("Ответ по СНГ -> ").lower()
+                if cis == "нет":
+                    cis_sources = ("myTarget", "Яндекс")
+                    for key in cis_sources:
+                        if key in new_android_rates:
+                            new_android_rates.pop(key)
+                        else:
+                            pass
+                        if key in new_ios_rates:
+                            new_ios_rates.pop(key)
+                        else:
+                            pass
+                elif cis == "да":
+                    pass
+                else:
+                    print("Похоже кто-то ошибся с ответом. Повторим? 😉")
+                    continue
 
-    def check_USA_region(self):
-        # Exclude sources that are not relevant to result.
-        new_android_rates, new_ios_rates, android_platform, ios_platform, new_android_volume, new_ios_volume = self.check_CIS_region()
-        print("\n10) Будет ли продвижение в США? (да/нет)")
+                print("\nБудет ли продвижение в США? (да/нет)")
+                usa = input("Ответ по США -> ").lower()
+                if usa == "нет":
+                    usa_sources = ("Twitter", "Snapchat", "Pinterest")
+                    for key in usa_sources:
+                        if key in new_android_rates:
+                            new_android_rates.pop(key)
+                        else:
+                            pass
+                        if key in new_ios_rates:
+                            new_ios_rates.pop(key)
+                        else:
+                            pass
+                elif usa == "да":
+                    pass
+                else:
+                    print("Похоже кто-то ошибся с ответом. Повторим? 😉")
+                    continue
 
-        while True:
-            push = input("Ответ -> ").lower()
-
-            if push == "нет":
-                usa_sources = ("Twitter", "Snapchat", "Pinterest")
-                for key in usa_sources:
-                    if key in new_android_rates:
-                        new_android_rates.pop(key)
-                    else:
-                        pass
-                    if key in new_ios_rates:
-                        new_ios_rates.pop(key)
-                    else:
-                        pass
-            elif push == "да":
+            elif worldwide == "да":
                 pass
             else:
                 print("Похоже кто-то ошибся с ответом. Повторим? 😉")
@@ -425,8 +427,8 @@ class App:
 
     def choose_tracker(self):
         # Correct sources if they are limited by tracking system.
-        new_android_rates, new_ios_rates, android_platform, ios_platform, new_android_volume, new_ios_volume = self.check_USA_region()
-        print("\n11) Рекламодатель будет использовать треккинговую систему AppsFlyer, Adjust или Kochava? (да/нет)?")
+        new_android_rates, new_ios_rates, android_platform, ios_platform, new_android_volume, new_ios_volume = self.check_regions()
+        print("\n10) Рекламодатель будет использовать треккинговую систему AppsFlyer, Adjust или Kochava? (да/нет)?")
 
         while True:
             tracker = input("Ответ -> ").lower()
