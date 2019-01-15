@@ -453,17 +453,20 @@ class App:
             budgets = {}
             for key, rate in new_android_rates.items():
                 volume = int(new_android_volume[key])
+                new_volume = format(int(new_android_volume[key]), ",d").replace(",", " ")
                 spend = volume * rate
+                new_spend = format(round(spend), ",d").replace(",", " ")
                 budgets[key] = spend
                 new_rate = (str(rate)).replace(".", ",")
-                print(f"{key}:".ljust(15) + f"ставка – {new_rate} USD".ljust(25) + f"объем – {volume}".ljust(20) + f"бюджет – {round(spend)} USD")
+                print(f"{key}:".ljust(15) + f"ставка – {new_rate} USD".ljust(25) + f"объем – {new_volume}".ljust(20) + f"бюджет – {new_spend} USD")
 
             print("\n")
 
             for key, spend in budgets.items():
                 if spend < BUDGET_BOTTOM[key]:
                     difference = BUDGET_BOTTOM[key] - round(spend)
-                    print(f"🆘  Обрати внимание, что мы не добираем {difference} USD до минимального бюджета по {key} для Android!")
+                    new_difference = format(difference, ",d").replace(",", " ")
+                    print(f"🆘  Обрати внимание, что мы не добираем {new_difference} USD до минимального бюджета по {key} для Android!")
                 else:
                     pass
         else:
@@ -474,17 +477,20 @@ class App:
             budgets = {}
             for key, rate in new_ios_rates.items():
                 volume = int(new_ios_volume[key])
+                new_volume = format(int(new_ios_volume[key]), ",d").replace(",", " ")
                 spend = volume * rate
+                new_spend = format(round(spend), ",d").replace(",", " ")
                 budgets[key] = spend
                 new_rate = (str(rate)).replace(".", ",")
-                print(f"{key}:".ljust(15) + f"ставка – {new_rate} USD".ljust(25) + f"объем – {volume}".ljust(20) + f"бюджет – {round(spend)} USD")
+                print(f"{key}:".ljust(15) + f"ставка – {new_rate} USD".ljust(25) + f"объем – {new_volume}".ljust(20) + f"бюджет – {new_spend} USD")
             
             print("\n")
 
             for key, spend in budgets.items():
                 if spend < BUDGET_BOTTOM[key]:
                     difference = BUDGET_BOTTOM[key] - round(spend)
-                    print(f"🆘  Обрати внимание, что мы не добираем {difference} USD до минимального бюджета по {key} для iOS!")
+                    new_difference = format(difference, ",d").replace(",", " ")
+                    print(f"🆘  Обрати внимание, что мы не добираем {new_difference} USD до минимального бюджета по {key} для iOS!")
                 else:
                     pass
         else:
@@ -574,7 +580,7 @@ class Landing:
                             (value / conversion), 2)
                     for key, value in new_landing_volume.items():
                         new_landing_volume[key] = round(
-                            (value / conversion), 2)
+                            (value * conversion), 2)
                 else:
                     print("Указанная модель – это точно одна из CPC или CPA?")
                     continue
@@ -695,17 +701,20 @@ class Landing:
         budgets = {}
         for key, rate in new_landing_rates.items():
             volume = int(new_landing_volume[key])
+            new_volume = format(int(new_landing_volume[key]), ",d").replace(",", " ")
             spend = volume * rate
+            new_spend = format(round(spend), ",d").replace(",", " ")
             budgets[key] = spend
             new_rate = (str(rate)).replace(".", ",")
-            print(f"{key}:".ljust(15) + f"ставка – {new_rate} USD".ljust(25) + f"объем – {volume}".ljust(20) + f"бюджет – {round(spend)} USD")
+            print(f"{key}:".ljust(15) + f"ставка – {new_rate} USD".ljust(25) + f"объем – {new_volume}".ljust(20) + f"бюджет – {new_spend} USD")
 
         print("\n")
 
         for key, spend in budgets.items():
             if spend < BUDGET_BOTTOM[key]:
                 difference = BUDGET_BOTTOM[key] - round(spend)
-                print(f"🆘  Обрати внимание, что мы не добираем {difference} USD до минимального бюджета по {key}!")
+                new_difference = format(difference, ",d").replace(",", " ")
+                print(f"🆘  Обрати внимание, что мы не добираем {new_difference} USD до минимального бюджета по {key}!")
             else:
                 pass
 
