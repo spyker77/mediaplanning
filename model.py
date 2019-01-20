@@ -26,8 +26,8 @@ MIN_BUDGET_PINTEREST = 1500
 VOLUME_COEFFICIENTS = {
         "Facebook": 1,
         "Google": 1.17,
-        "myTarget": 1,
-        "In-App": 0.4,
+        "myTarget": 1.33,
+        "In-App": 0.67,
         "Видеосети": 0.33,
         "Twitter": 0.5,
         "Snapchat": 0.23,
@@ -466,7 +466,7 @@ class App:
                 if spend < BUDGET_BOTTOM[key]:
                     difference = BUDGET_BOTTOM[key] - round(spend)
                     new_difference = format(difference, ",d").replace(",", " ")
-                    print(f"🆘  Обрати внимание, что мы не добираем {new_difference} USD до минимального бюджета по {key} для Android!")
+                    print(f"🚨  Обрати внимание, что мы не добираем {new_difference} USD до минимального бюджета по {key} для Android!")
                 else:
                     pass
         else:
@@ -490,7 +490,7 @@ class App:
                 if spend < BUDGET_BOTTOM[key]:
                     difference = BUDGET_BOTTOM[key] - round(spend)
                     new_difference = format(difference, ",d").replace(",", " ")
-                    print(f"🆘  Обрати внимание, что мы не добираем {new_difference} USD до минимального бюджета по {key} для iOS!")
+                    print(f"🚨  Обрати внимание, что мы не добираем {new_difference} USD до минимального бюджета по {key} для iOS!")
                 else:
                     pass
         else:
@@ -714,7 +714,7 @@ class Landing:
             if spend < BUDGET_BOTTOM[key]:
                 difference = BUDGET_BOTTOM[key] - round(spend)
                 new_difference = format(difference, ",d").replace(",", " ")
-                print(f"🆘  Обрати внимание, что мы не добираем {new_difference} USD до минимального бюджета по {key}!")
+                print(f"🚨  Обрати внимание, что мы не добираем {new_difference} USD до минимального бюджета по {key}!")
             else:
                 pass
 
