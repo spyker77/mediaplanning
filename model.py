@@ -101,7 +101,7 @@ class App:
     def start_calculate(self):
         # Calculate new rates and volumes based on input.
         android_platform, ios_platform = self.select_platform()
-        print("\n2) Укажи ставку и объем, которые получились при настройке кампании в Facebook при выборе CPI модели.")
+        print("\n2) Какая ставка и объем получились при настройке кампании в Facebook?")
 
         while True:
             try:
@@ -512,10 +512,27 @@ class Landing:
         "Яндекс": 1
     }
 
+    def choose_model(self):
+        # Define ads model.
+        print("\nПриступим к оценке лендинга? 😜")
+        print("\n1) Давай укажем модель работы, по которой будем работать? (CPM/CPC/CPA)")
+        print("– если CPM, то поставь 1")
+        print("– если CPC, то поставь 2")
+        print("– если CPA, то поставь 3")
+
+        while True:
+            try:
+                model = input("Модель работы -> ").lower()
+                return model
+
+            except TypeError:
+                print("Указанная модель – это точно одна из CPM, CPC или CPA?")
+                continue
+
     def start_calculate(self):
         # Calculate new rates and volumes based on input.
-        print("\nПриступим к оценке лендинга? 😜")
-        print("\n1) Укажи ставку и объем, которые получились при настройке кампании в Facebook при выборе CPC модели.")
+        model = self.choose_model()
+        print("\n2) Какая ставка и объем получились при настройке кампании в Facebook?")
 
         while True:
             try:
@@ -534,7 +551,24 @@ class Landing:
                     new_value = round((value * landing_volume), 2)
                     new_landing_volume[key] = new_value
 
-                return new_landing_rates, new_landing_volume
+                if model == "1":
+                    pass
+                elif model == "2":
+                    pass
+                elif model == "3":
+                    print("Что ж, клиент хочет работать по CPA, тогда мне нужны данные по конверсии из перехода в целевое действие! (например, 15)")
+                    conversion = float(input("Процент конверсии -> ").replace(",", "."))/100
+                    for key, value in new_landing_rates.items():
+                        new_landing_rates[key] = round(
+                            (value / conversion), 2)
+                    for key, value in new_landing_volume.items():
+                        new_landing_volume[key] = round(
+                            (value * conversion), 2)
+                else:
+                    print("Указанная модель – это точно одна из CPM, CPC или CPA?")
+                    continue
+
+                return new_landing_rates, new_landing_volume, model
 
             except ValueError:
                 print("Похоже кто-то ошибся с введенным значением. Повторим? 😉")
@@ -542,8 +576,8 @@ class Landing:
 
     def check_creatives(self):
         # Correct rates due to creatives.
-        new_landing_rates, new_landing_volume = self.start_calculate()
-        print("\n2) Можем ли мы использовать свои креативы, чтобы повысить конверсию? (да/нет)")
+        new_landing_rates, new_landing_volume, model = self.start_calculate()
+        print("\n3) Можем ли мы использовать свои креативы, чтобы повысить конверсию? (да/нет)")
 
         while True:
             answer = input("Ответ -> ").lower()
@@ -557,43 +591,11 @@ class Landing:
                 print("Похоже кто-то ошибся с ответом. Повторим? 😉")
                 continue
 
-            return new_landing_rates, new_landing_volume
-
-    def choose_model(self):
-        # Correct rates and volumes according to the CPA model if necessary.
-        new_landing_rates, new_landing_volume = self.check_creatives()
-        print("\n3) Давай укажем модель работы, к которой рекламодатель привязал KPI? (CPC/CPA)")
-        print("– если CPC, то поставь 1")
-        print("– если CPA, то поставь 2")
-
-        while True:
-            try:
-                model = input("Модель работы -> ").lower()
-
-                if model == "1":
-                    pass
-                elif model == "2":
-                    print("Что ж, клиент хочет работать по CPA, тогда мне нужны данные по конверсии из перехода в целевое действие! (например, 15)")
-                    conversion = float(input("Процент конверсии -> ").replace(",", "."))/100
-                    for key, value in new_landing_rates.items():
-                        new_landing_rates[key] = round(
-                            (value / conversion), 2)
-                    for key, value in new_landing_volume.items():
-                        new_landing_volume[key] = round(
-                            (value * conversion), 2)
-                else:
-                    print("Указанная модель – это точно одна из CPC или CPA?")
-                    continue
-
-                return new_landing_rates, new_landing_volume
-
-            except TypeError:
-                print("Указанная модель – это точно одна из CPC или CPA?")
-                continue
+            return new_landing_rates, new_landing_volume, model
 
     def check_for_push(self):
         # Correct rates if it's a push-campaign.
-        new_landing_rates, new_landing_volume = self.choose_model()
+        new_landing_rates, new_landing_volume, model = self.check_creatives()
         print("\n4) Это будет push-кампания (вывод нового продукта в ТОП за месяц) или нет? (да/нет)")
 
         while True:
@@ -612,11 +614,11 @@ class Landing:
                 print("Похоже кто-то ошибся с ответом. Повторим? 😉")
                 continue
 
-            return new_landing_rates, new_landing_volume
+            return new_landing_rates, new_landing_volume, model
 
     def consider_season(self):
         # Correct rates if the start is on high season.
-        new_landing_rates, new_landing_volume = self.check_for_push()
+        new_landing_rates, new_landing_volume, model = self.check_for_push()
         print("\n5) Есть несколько месяцев, старт в которых получается дороже обычного:")
         print(
             f"– если будем запускать кампанию в Феврале или Ноябре и на 1 месяц, тогда поставь {INCREASE_FEBRUARY_NOVEMBER}")
@@ -639,7 +641,7 @@ class Landing:
                 else:
                     pass
 
-                return new_landing_rates, new_landing_volume
+                return new_landing_rates, new_landing_volume, model
 
             except ValueError:
                 print("Похоже кто-то ошибся с введенным значением. Повторим? 😉")
@@ -647,7 +649,7 @@ class Landing:
 
     def check_regions(self):
         # Exclude sources that are not relevant to targeting.
-        new_landing_rates, new_landing_volume = self.consider_season()
+        new_landing_rates, new_landing_volume, model = self.consider_season()
         print("\n6) Будет ли продвижение WW? (да/нет)")
 
         while True:
@@ -691,16 +693,21 @@ class Landing:
                 print("Похоже кто-то ошибся с ответом. Повторим? 😉")
                 continue
 
-            return new_landing_rates, new_landing_volume
+            return new_landing_rates, new_landing_volume, model
 
     def show_results(self):
         # This is the final step of estimation.
-        new_landing_rates, new_landing_volume = self.check_regions()
+        new_landing_rates, new_landing_volume, model = self.check_regions()
         print("\n🏆  Моя рекомендация будет следующей: 🏆")
         print("\n--- Лендинг 📄  ---")
         budgets = {}
         for key, rate in new_landing_rates.items():
-            volume = int(new_landing_volume[key])
+
+            if model == "1":
+                volume = int(new_landing_volume[key])/1000
+            else:
+                volume = int(new_landing_volume[key])
+
             new_volume = format(int(new_landing_volume[key]), ",d").replace(",", " ")
             spend = volume * rate
             new_spend = format(round(spend), ",d").replace(",", " ")
