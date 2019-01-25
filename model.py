@@ -98,10 +98,44 @@ class App:
 
             return android_platform, ios_platform
 
+    def choose_model(self):
+        # Correct rates and volumes according to the CPA model if necessary.
+        nandroid_platform, ios_platform = self.select_platform()
+        print("\n2) Давай укажем модель работы, к которой рекламодатель привязал KPI?")
+        print("– если CPM, то поставь 1")
+        print("– если CPI, то поставь 2")
+        print("– если CPA, то поставь 3")
+
+        while True:
+            try:
+                model = input("Модель работы -> ").lower()
+                if model == "1":
+                    pass
+                elif model == "2":
+                    pass
+                elif model == "3":
+                    pass
+                else:
+                    print("Указанная модель – это точно одна из CPI, CPA или CPM?")
+                    continue
+
+                return nandroid_platform, ios_platform, model
+
+            except ValueError:
+                print("Убедись, чтобы в конверсии было указано число!")
+                continue
+
     def start_calculate(self):
         # Calculate new rates and volumes based on input.
-        android_platform, ios_platform = self.select_platform()
-        print("\n2) Какая ставка и объем получились при настройке кампании в Facebook?")
+        android_platform, ios_platform, model = self.choose_model()
+
+        if model == "3":
+            print("\nЧто ж, клиент хочет работать по CPA, тогда мне нужны данные по конверсии из установки в целевое действие! (например, 15)")
+            conversion = float(input("Процент конверсии -> ").replace(",", "."))/100
+        else:
+            pass
+
+        print("\n3) Какая ставка и объем получились при настройке кампании в Facebook?")
 
         while True:
             try:
@@ -141,7 +175,23 @@ class App:
                     new_ios_rates = {}
                     new_ios_volume = {}
 
-                return new_android_rates, new_ios_rates, android_platform, ios_platform, new_android_volume, new_ios_volume
+                if model == "3":
+                    for key, value in new_android_rates.items():
+                        new_android_rates[key] = round(
+                            (value / conversion), 2)
+                    for key, value in new_ios_rates.items():
+                        new_ios_rates[key] = round(
+                            (value / conversion), 2)
+                    for key, value in new_android_volume.items():
+                        new_android_volume[key] = round(
+                            (value * conversion), 2)
+                    for key, value in new_ios_volume.items():
+                        new_ios_volume[key] = round(
+                            (value * conversion), 2)
+                else:
+                    pass
+
+                return new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volume, new_ios_volume
 
             except ValueError:
                 print("Похоже кто-то ошибся с введенным значением. Повторим? 😉")
@@ -149,8 +199,8 @@ class App:
 
     def check_creatives(self):
         # Correct rates due to creatives.
-        new_android_rates, new_ios_rates, android_platform, ios_platform, new_android_volume, new_ios_volume = self.start_calculate()
-        print("\n3) Можем ли мы использовать свои креативы, чтобы повысить конверсию? (да/нет)")
+        new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volume, new_ios_volume = self.start_calculate()
+        print("\n4) Можем ли мы использовать свои креативы, чтобы повысить конверсию? (да/нет)")
 
         while True:
             answer = input("Ответ -> ").lower()
@@ -169,12 +219,12 @@ class App:
                 print("Похоже кто-то ошибся с ответом. Повторим? 😉")
                 continue
 
-        return new_android_rates, new_ios_rates, android_platform, ios_platform, new_android_volume, new_ios_volume
+        return new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volume, new_ios_volume
 
     def check_store_rating(self):
         # Correct rates if stores' rating lower than 4.
-        new_android_rates, new_ios_rates, android_platform, ios_platform, new_android_volume, new_ios_volume = self.check_creatives()
-        print("\n4) А как обстоят дела с рейтингом приложения? (например, 4.4)")
+        new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volume, new_ios_volume = self.check_creatives()
+        print("\n5) А как обстоят дела с рейтингом приложения? (например, 4.4)")
 
         while True:
             try:
@@ -208,7 +258,7 @@ class App:
                 else:
                     pass
 
-                return new_android_rates, new_ios_rates, android_platform, ios_platform, new_android_volume, new_ios_volume
+                return new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volume, new_ios_volume
 
             except ValueError:
                 print("Похоже кто-то ошибся с введенным значением. Повторим? 😉")
@@ -216,8 +266,8 @@ class App:
 
     def check_app_size(self):
         # Correct rates according to the sizes mentioned in https://bit.ly/2TpCoF5.
-        new_android_rates, new_ios_rates, android_platform, ios_platform, new_android_volume, new_ios_volume = self.check_store_rating()
-        print("\n5) Давай укажем размер приложения в мегабайтах? (например, 70)")
+        new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volume, new_ios_volume = self.check_store_rating()
+        print("\n6) Давай укажем размер приложения в мегабайтах? (например, 70)")
 
         while True:
             try:
@@ -261,55 +311,15 @@ class App:
                 else:
                     pass
 
-                return new_android_rates, new_ios_rates, android_platform, ios_platform, new_android_volume, new_ios_volume
+                return new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volume, new_ios_volume
 
             except ValueError:
                 print("Похоже кто-то ошибся с введенным значением. Повторим? 😉")
                 continue
 
-    def choose_model(self):
-        # Correct rates and volumes according to the CPA model if necessary.
-        new_android_rates, new_ios_rates, android_platform, ios_platform, new_android_volume, new_ios_volume = self.check_app_size()
-        print("\n6) Давай укажем модель работы, к которой рекламодатель привязал KPI?")
-        print("– если CPI, то поставь 1")
-        print("– если CPA, то поставь 2")
-
-        while True:
-            try:
-                model = input("Модель работы -> ").lower()
-
-                if model == "1":
-                    pass
-                elif model == "2":
-                    print(
-                        "\nЧто ж, клиент хочет работать по CPA, тогда мне нужны данные по конверсии из установки в целевое действие! (например, 15)")
-                    conversion = float(
-                        input("Процент конверсии -> ").replace(",", "."))/100
-                    for key, value in new_android_rates.items():
-                        new_android_rates[key] = round(
-                            (value / conversion), 2)
-                    for key, value in new_ios_rates.items():
-                        new_ios_rates[key] = round(
-                            (value / conversion), 2)
-                    for key, value in new_android_volume.items():
-                        new_android_volume[key] = round(
-                            (value * conversion), 2)
-                    for key, value in new_ios_volume.items():
-                        new_ios_volume[key] = round(
-                            (value * conversion), 2)
-                else:
-                    print("Указанная модель – это точно одна из CPI или CPA?")
-                    continue
-
-                return new_android_rates, new_ios_rates, android_platform, ios_platform, new_android_volume, new_ios_volume
-
-            except ValueError:
-                print("Убедись, чтобы в конверсии было указано число!")
-                continue
-
     def check_for_push(self):
         # Correct rates if it's a push-campaign.
-        new_android_rates, new_ios_rates, android_platform, ios_platform, new_android_volume, new_ios_volume = self.choose_model()
+        new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volume, new_ios_volume = self.check_app_size()
         print("\n7) Это будет push-кампания (вывод нового продукта в ТОП за месяц) или нет? (да/нет)")
 
         while True:
@@ -330,11 +340,11 @@ class App:
                 print("Похоже кто-то ошибся с ответом. Повторим? 😉")
                 continue
 
-            return new_android_rates, new_ios_rates, android_platform, ios_platform, new_android_volume, new_ios_volume
+            return new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volume, new_ios_volume
 
     def consider_season(self):
         # Correct rates if the start is on high season.
-        new_android_rates, new_ios_rates, android_platform, ios_platform, new_android_volume, new_ios_volume = self.check_for_push()
+        new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volume, new_ios_volume = self.check_for_push()
         print("\n8) Есть несколько месяцев, старт в которых получается дороже обычного:")
         print(
             f"– если будем запускать кампанию в Феврале или Ноябре и на 1 месяц, тогда поставь {INCREASE_FEBRUARY_NOVEMBER}")
@@ -363,7 +373,7 @@ class App:
                 else:
                     pass
 
-                return new_android_rates, new_ios_rates, android_platform, ios_platform, new_android_volume, new_ios_volume
+                return new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volume, new_ios_volume
 
             except ValueError:
                 print("Похоже кто-то ошибся с введенным значением. Повторим? 😉")
@@ -371,7 +381,7 @@ class App:
 
     def check_regions(self):
         # Exclude sources that are not relevant to targeting.
-        new_android_rates, new_ios_rates, android_platform, ios_platform, new_android_volume, new_ios_volume = self.consider_season()
+        new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volume, new_ios_volume = self.consider_season()
         print("\n9) Будет ли продвижение WW? (да/нет)")
 
         while True:
@@ -423,11 +433,11 @@ class App:
                 print("Похоже кто-то ошибся с ответом. Повторим? 😉")
                 continue
 
-            return new_android_rates, new_ios_rates, android_platform, ios_platform, new_android_volume, new_ios_volume
+            return new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volume, new_ios_volume
 
     def choose_tracker(self):
         # Correct sources if they are limited by tracking system.
-        new_android_rates, new_ios_rates, android_platform, ios_platform, new_android_volume, new_ios_volume = self.check_regions()
+        new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volume, new_ios_volume = self.check_regions()
         print("\n10) Рекламодатель будет использовать треккинговую систему AppsFlyer, Adjust или Kochava? (да/нет)?")
 
         while True:
@@ -441,18 +451,23 @@ class App:
                 print("Похоже кто-то ошибся с ответом. Повторим? 😉")
                 continue
 
-            return new_android_rates, new_ios_rates, android_platform, ios_platform, new_android_volume, new_ios_volume
+            return new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volume, new_ios_volume
 
     def show_results(self):
         # This is the final step of estimation.
-        new_android_rates, new_ios_rates, android_platform, ios_platform, new_android_volume, new_ios_volume = self.choose_tracker()
+        new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volume, new_ios_volume = self.choose_tracker()
         print("\n🏆  Моя рекомендация будет следующей: 🏆")
 
         if android_platform == True:
             print("\n--- Android 🤖  ---")
             budgets = {}
             for key, rate in new_android_rates.items():
-                volume = int(new_android_volume[key])
+
+                if model == "1":
+                    volume = int(new_android_volume[key])/1000
+                else:
+                    volume = int(new_android_volume[key])
+
                 new_volume = format(int(new_android_volume[key]), ",d").replace(",", " ")
                 spend = volume * rate
                 new_spend = format(round(spend), ",d").replace(",", " ")
@@ -476,7 +491,12 @@ class App:
             print("\n--- iOS 🍏  ---")
             budgets = {}
             for key, rate in new_ios_rates.items():
-                volume = int(new_ios_volume[key])
+
+                if model == "1":
+                    volume = int(new_ios_volume[key])/1000
+                else:
+                    volume = int(new_ios_volume[key])
+
                 new_volume = format(int(new_ios_volume[key]), ",d").replace(",", " ")
                 spend = volume * rate
                 new_spend = format(round(spend), ",d").replace(",", " ")
