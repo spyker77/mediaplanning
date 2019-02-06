@@ -27,13 +27,13 @@ VOLUME_COEFFICIENTS = {
         "Facebook": 1,
         "Google": 1.17,
         "myTarget": 1.33,
-        "In-App": 0.67,
+        "In-App": 1.17,
         "Видеосети": 0.5,
         "Twitter": 0.5,
         "Snapchat": 0.17,
         "Яндекс": 0.67,
         "Pinterest": 0.17,
-        "DSP": 0.83
+        "DSP": 1.33
     }
 
 BUDGET_BOTTOM = {
