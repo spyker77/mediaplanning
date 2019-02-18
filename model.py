@@ -22,6 +22,8 @@ MIN_BUDGET_TWITTER = 3000
 MIN_BUDGET_SNAPCHAT = 2000
 MIN_BUDGET_YANDEX = 1000
 MIN_BUDGET_PINTEREST = 1500
+MIN_BUDGET_DSP = 2000
+MIN_BUDGET_ASA = 2000
 
 VOLUME_COEFFICIENTS = {
         "Facebook": 1,
@@ -33,7 +35,8 @@ VOLUME_COEFFICIENTS = {
         "Snapchat": 0.17,
         "Яндекс": 0.67,
         "Pinterest": 0.17,
-        "DSP": 1.33
+        "DSP": 1.33,
+        "ASA": 0.5
     }
 
 BUDGET_BOTTOM = {
@@ -46,7 +49,8 @@ BUDGET_BOTTOM = {
         "Snapchat": 2000,
         "Яндекс": 1000,
         "Pinterest": 1000,
-        "DSP": 2000
+        "DSP": 2000,
+        "ASA": 2000
     }
 
 
@@ -61,7 +65,8 @@ class App:
         "Twitter": 1.1,
         "Snapchat": 1,
         "Яндекс": 1,
-        "DSP": 0.9
+        "DSP": 0.9,
+        "ASA": 1
     }
 
     ios_rates = {
@@ -73,7 +78,8 @@ class App:
         "Twitter": 1.1,
         "Snapchat": 1,
         "Яндекс": 1,
-        "DSP": 0.9
+        "DSP": 0.9,
+        "ASA": 1
     }
 
     def select_platform(self):
@@ -442,7 +448,7 @@ class App:
     def choose_tracker(self):
         # Correct sources if they are limited by tracking system.
         new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volume, new_ios_volume = self.check_regions()
-        print("\n10) Рекламодатель будет использовать треккинговую систему AppsFlyer, Adjust или Kochava? (да/нет)?")
+        print("\n10) Рекламодатель будет использовать треккинговую систему AppsFlyer, Adjust, Kochava или Tune? (да/нет)?")
 
         while True:
             tracker = input("Ответ -> ").lower()
