@@ -37,7 +37,7 @@ VOLUME_COEFFICIENTS = {
         "Google": 1.17,
         "myTarget": 1.33,
         "In-App": 1.17,
-        "Видеосети": 0.5,
+        "Видеосети": 0.67,
         "Twitter": 0.5,
         "Snapchat": 0.17,
         "Яндекс": 0.67,
@@ -114,7 +114,7 @@ class App:
 
     def choose_model(self):
         # Correct rates and volumes according to the CPA model if necessary.
-        nandroid_platform, ios_platform = self.select_platform()
+        android_platform, ios_platform = self.select_platform()
         print("\n2) Давай укажем модель работы, к которой рекламодатель привязал KPI?")
         print("– если CPM, то поставь 1")
         print("– если CPI, то поставь 2")
@@ -133,28 +133,15 @@ class App:
                     print("Указанная модель – это точно одна из CPI, CPA или CPM?")
                     continue
 
-                return nandroid_platform, ios_platform, model
+                return android_platform, ios_platform, model
 
             except ValueError:
                 print("Убедись, чтобы в конверсии было указано число!")
                 continue
 
-    def specify_budget(self):
-        # Limited budget may affect futher estimations.
-        nandroid_platform, ios_platform, model = self.choose_model()
-        print("\n3) Давай укажем бюджет кампании. Если бюджет неограниченный и считаем по максимуму, тогда жми Enter.")
-
-        answer = "".join(input("Бюджет -> "))
-        if answer == "":
-            budget = 999999999999
-        else:
-            budget = int(answer)
-
-        return nandroid_platform, ios_platform, model, budget
-
     def start_calculate(self):
         # Calculate new rates and volumes based on input.
-        android_platform, ios_platform, model, budget = self.specify_budget()
+        android_platform, ios_platform, model = self.choose_model()
 
         if model == "3":
             print("\nЧто ж, клиент хочет работать по CPA, тогда мне нужны данные по конверсии из установки в целевое действие! (например, 15)")
@@ -163,7 +150,7 @@ class App:
         else:
             pass
 
-        print("\n4) Какая ставка и дневной объем получились при настройке кампании в Facebook?")
+        print("\n3) Какая ставка и дневной объем получились при настройке кампании в Facebook?")
 
         while True:
             try:
@@ -219,15 +206,29 @@ class App:
                 else:
                     pass
 
-                return new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volume, new_ios_volume, budget
+                return new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volume, new_ios_volume
 
             except ValueError:
                 print("Похоже кто-то ошибся с введенным значением. Повторим? 😉")
                 continue
 
+
+    def specify_budget(self):
+        # Limited budget may affect futher estimations.
+        new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volume, new_ios_volume = self.start_calculate()
+        print("\n4) Давай укажем бюджет кампании. Если бюджет неограниченный и считаем по максимуму, тогда жми Enter.")
+
+        answer = "".join(input("Бюджет -> "))
+        if answer == "":
+            budget = 999999999999
+        else:
+            budget = int(answer)
+
+        return new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volume, new_ios_volume, budget
+
     def check_creatives(self):
         # Correct rates due to creatives.
-        new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volume, new_ios_volume, budget = self.start_calculate()
+        new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volume, new_ios_volume, budget = self.specify_budget()
         print("\n5) Можем ли мы использовать свои креативы, чтобы повысить конверсию? (да/нет)")
 
         while True:
@@ -508,6 +509,7 @@ class App:
                 else:
                     volumes = [int(volume * number_of_days_in_month) for key, volume in new_android_volume.items()]
                     volumes_all_together.append(volumes)
+            # print(f"Here is the \"volumes_all_together\" for Android in preestimation: {volumes_all_together}")
 
             budgets = {}
             n = 0
@@ -542,6 +544,7 @@ class App:
                     volumes = [int(volume * number_of_days_in_month) for key, volume in new_ios_volume.items()]
                     volumes_all_together.append(volumes)
 
+            # print(f"Here is the \"volumes_all_together\" for iOS in preestimation: {volumes_all_together}")
             budgets = {}
             n = 0
             for volume in numpy.sum(volumes_all_together, axis=0):
@@ -570,227 +573,133 @@ class App:
         # If budget limit exceeded then decrease volumes accordingly.
         print("\n🏆  Моя рекомендация будет следующей: 🏆")
         difference = budget / total_budget
-        if difference < 1:
-            if android_platform == True:
-                print("\n--- Android 🤖  ---")
-                table_android = BeautifulTable()
-                table_android.append_column(
-                    "Источник", [key for key, value in new_android_rates.items()])
-                table_android.append_column(
-                    f"Ставка {models[model]}", [(str(rate)).replace(".", ",") for key, rate in new_android_rates.items()])
+        
+        if android_platform == True:
+            print("\n--- Android 🤖  ---")
+            table_android = BeautifulTable()
+            table_android.append_column(
+                "Источник", [key for key, value in new_android_rates.items()])
+            table_android.append_column(
+                f"Ставка {models[model]}", [(str(rate)).replace(".", ",") for key, rate in new_android_rates.items()])
 
-                # Count total volumes for Android.
-                volumes_all_together = []
-                for month in which_months:
-                    number_of_days_in_month = int(
-                        calendar.monthrange(now.year, month)[1])
-                    if month == 2 or month == 11:
+            # Count total volumes for Android.
+            volumes_all_together = []
+            for month in which_months:
+                number_of_days_in_month = int(
+                    calendar.monthrange(now.year, month)[1])
+                if month == 2 or month == 11:
+                    if difference < 1:
                         volumes = [int(((volume / INCREASE_FEBRUARY_NOVEMBER) * number_of_days_in_month) * difference) for key, volume in new_android_volume.items()]
-                        volumes_all_together.append(volumes)
-                        table_android.append_column(months[month], volumes)
-                    elif month == 12:
+                    else:
+                        volumes = [int(((volume / 1000) / INCREASE_FEBRUARY_NOVEMBER) * number_of_days_in_month) if model == "1" else int((volume / INCREASE_FEBRUARY_NOVEMBER) * number_of_days_in_month) for key, volume in new_android_volume.items()]
+                    volumes_all_together.append(volumes)
+                    table_android.append_column(months[month], volumes)
+                elif month == 12:
+                    if difference < 1:
                         volumes = [int((volume / INCREASE_DECEMBER) * number_of_days_in_month) * difference for key, volume in new_android_volume.items()]
-                        volumes_all_together.append(volumes)
-                        table_android.append_column(months[month], volumes)
                     else:
+                        volumes = [int(((volume / 1000) / INCREASE_DECEMBER) * number_of_days_in_month) if model == "1" else int((volume / INCREASE_DECEMBER) * number_of_days_in_month) for key, volume in new_android_volume.items()]
+                    volumes_all_together.append(volumes)
+                    table_android.append_column(months[month], volumes)
+                else:
+                    if difference < 1:
                         volumes = [int((volume * number_of_days_in_month) * difference) for key, volume in new_android_volume.items()]
-                        volumes_all_together.append(volumes)
-                        table_android.append_column(months[month], volumes)
-
-                budgets = {}
-                n = 0
-                for volume in numpy.sum(volumes_all_together, axis=0):
-                    if n <= len(new_android_rates) - 1:
-                        key = list(new_android_rates.keys())[n]
-                        rate = list(new_android_rates.values())[n]
-                        if model == "1":
-                            budgets[key] = (volume * rate) / 1000
-                        else:
-                            budgets[key] = volume * rate
-                        n += 1
-
-                table_android.append_column(
-                    "Всего без НДС", [int(spend) for key, spend in budgets.items()])
-                print(table_android)
-
-                print("\n")
-
-                for key, spend in budgets.items():
-                    if spend < BUDGET_BOTTOM[key]:
-                        shortage = BUDGET_BOTTOM[key] - spend
-                        print(
-                            f"🚨  Обрати внимание, что мы не добираем {int(shortage)} до минимального бюджета по {key} для Android!")
                     else:
-                        pass
+                        volumes = [int((volume / 1000) * number_of_days_in_month) if model == "1" else int(volume * number_of_days_in_month) for key, volume in new_android_volume.items()]
+                    volumes_all_together.append(volumes)
+                    table_android.append_column(months[month], volumes)
 
-            else:
-                pass
-
-            if ios_platform == True:
-                print("\n--- iOS 🍏  ---")
-                table_ios = BeautifulTable()
-                table_ios.append_column(
-                    "Источник", [key for key, value in new_ios_rates.items()])
-                table_ios.append_column(
-                    f"Ставка {models[model]}", [(str(rate)).replace(".", ",") for key, rate in new_ios_rates.items()])
-
-                # Count total volumes for iOS.
-                volumes_all_together = []
-                for month in which_months:
-                    number_of_days_in_month = int(
-                        calendar.monthrange(now.year, month)[1])
-                    if month == 2 or month == 11:
-                        volumes = [int(((volume / INCREASE_FEBRUARY_NOVEMBER) * number_of_days_in_month) * difference) for key, volume in new_ios_volume.items()]
-                        volumes_all_together.append(volumes)
-                        table_ios.append_column(months[month], volumes)
-                    elif month == 12:
-                        volumes = [int(((volume / INCREASE_DECEMBER) * number_of_days_in_month) * difference) for key, volume in new_ios_volume.items()]
-                        volumes_all_together.append(volumes)
-                        table_ios.append_column(months[month], volumes)
+            # print(f"Here is the \"volumes_all_together\" for Android in estimation: {volumes_all_together}")
+            budgets = {}
+            n = 0
+            for volume in numpy.sum(volumes_all_together, axis=0):
+                if n <= len(new_android_rates) - 1:
+                    key = list(new_android_rates.keys())[n]
+                    rate = list(new_android_rates.values())[n]
+                    if model == "1":
+                        budgets[key] = (volume * rate) / 1000
                     else:
-                        volumes = [int((volume * number_of_days_in_month) * difference) for key, volume in new_ios_volume.items()]
-                        volumes_all_together.append(volumes)
-                        table_ios.append_column(months[month], volumes)
+                        budgets[key] = volume * rate
+                    n += 1
 
-                budgets = {}
-                n = 0
-                for volume in numpy.sum(volumes_all_together, axis=0):
-                    if n <= len(new_ios_rates) - 1:
-                        key = list(new_ios_rates.keys())[n]
-                        rate = list(new_ios_rates.values())[n]
-                        if model == "1":
-                            budgets[key] = (volume * rate) / 1000
-                        else:
-                            budgets[key] = volume * rate
-                        n += 1
+            table_android.append_column(
+                "Всего без НДС", [int(spend) for key, spend in budgets.items()])
+            print(table_android)
 
-                table_ios.append_column("Всего без НДС", [int(
-                    spend) for key, spend in budgets.items()])
-                print(table_ios)
+            print("\n")
 
-                print("\n")
-
-                for key, spend in budgets.items():
-                    if spend < BUDGET_BOTTOM[key]:
-                        shortage = BUDGET_BOTTOM[key] - spend
-                        print(
-                            f"🚨  Обрати внимание, что мы не добираем {int(shortage)} до минимального бюджета по {key} для iOS!")
-                    else:
-                        pass
-
-            else:
-                pass
-
+            for key, spend in budgets.items():
+                if spend < BUDGET_BOTTOM[key]:
+                    shortage = BUDGET_BOTTOM[key] - spend
+                    print(
+                        f"🚨  Обрати внимание, что мы не добираем {int(shortage)} до минимального бюджета по {key} для Android!")
+                else:
+                    pass
         else:
-            if android_platform == True:
-                print("\n--- Android 🤖  ---")
-                table_android = BeautifulTable()
-                table_android.append_column(
-                    "Источник", [key for key, value in new_android_rates.items()])
-                table_android.append_column(
-                    f"Ставка {models[model]}", [(str(rate)).replace(".", ",") for key, rate in new_android_rates.items()])
+            pass
 
-                # Count total volumes for Android.
-                volumes_all_together = []
-                for month in which_months:
-                    number_of_days_in_month = int(
-                        calendar.monthrange(now.year, month)[1])
-                    if month == 2 or month == 11:
-                        volumes = [int(((volume / 1000) / INCREASE_FEBRUARY_NOVEMBER) * number_of_days_in_month) if model == "1" else int(
-                            (volume / INCREASE_FEBRUARY_NOVEMBER) * number_of_days_in_month) for key, volume in new_android_volume.items()]
-                        volumes_all_together.append(volumes)
-                        table_android.append_column(months[month], volumes)
-                    elif month == 12:
-                        volumes = [int(((volume / 1000) / INCREASE_DECEMBER) * number_of_days_in_month) if model == "1" else int(
-                            (volume / INCREASE_DECEMBER) * number_of_days_in_month) for key, volume in new_android_volume.items()]
-                        volumes_all_together.append(volumes)
-                        table_android.append_column(months[month], volumes)
+        if ios_platform == True:
+            print("\n--- iOS 🍏  ---")
+            table_ios = BeautifulTable()
+            table_ios.append_column(
+                "Источник", [key for key, value in new_ios_rates.items()])
+            table_ios.append_column(
+                f"Ставка {models[model]}", [(str(rate)).replace(".", ",") for key, rate in new_ios_rates.items()])
+
+            # Count total volumes for iOS.
+            volumes_all_together = []
+            for month in which_months:
+                number_of_days_in_month = int(
+                    calendar.monthrange(now.year, month)[1])
+                if month == 2 or month == 11:
+                    if difference < 1:
+                        volumes = [int(((volume / INCREASE_FEBRUARY_NOVEMBER) * number_of_days_in_month) * difference) for key, volume in new_ios_volume.items()]
                     else:
-                        volumes = [int((volume / 1000) * number_of_days_in_month) if model == "1" else int(
-                            volume * number_of_days_in_month) for key, volume in new_android_volume.items()]
-                        volumes_all_together.append(volumes)
-                        table_android.append_column(months[month], volumes)
+                        volumes = [int(((volume / 1000) / INCREASE_FEBRUARY_NOVEMBER) * number_of_days_in_month) if model == "1" else int((volume / INCREASE_FEBRUARY_NOVEMBER) * number_of_days_in_month) for key, volume in new_ios_volume.items()]
+                    volumes_all_together.append(volumes)
+                    table_ios.append_column(months[month], volumes)
+                elif month == 12:
+                    if difference < 1:
+                        volumes = [int(((volume / INCREASE_DECEMBER) * number_of_days_in_month) * difference) for key, volume in new_ios_volume.items()]
+                    else:
+                        volumes = [int(((volume / 1000) / INCREASE_DECEMBER) * number_of_days_in_month) if model == "1" else int((volume / INCREASE_DECEMBER) * number_of_days_in_month) for key, volume in new_ios_volume.items()]
+                    volumes_all_together.append(volumes)
+                    table_ios.append_column(months[month], volumes)
+                else:
+                    if difference < 1:
+                        volumes = [int((volume * number_of_days_in_month) * difference) for key, volume in new_ios_volume.items()]
+                    else:
+                        volumes = [int((volume / 1000) * number_of_days_in_month) if model == "1" else int(volume * number_of_days_in_month) for key, volume in new_ios_volume.items()]
+                    volumes_all_together.append(volumes)
+                    table_ios.append_column(months[month], volumes)
 
-                budgets = {}
-                n = 0
-                for volume in numpy.sum(volumes_all_together, axis=0):
-                    if n <= len(new_android_rates) - 1:
-                        key = list(new_android_rates.keys())[n]
-                        rate = list(new_android_rates.values())[n]
+            # print(f"Here is the \"volumes_all_together\" for iOS in estimation: {volumes_all_together}")
+            budgets = {}
+            n = 0
+            for volume in numpy.sum(volumes_all_together, axis=0):
+                if n <= len(new_ios_rates) - 1:
+                    key = list(new_ios_rates.keys())[n]
+                    rate = list(new_ios_rates.values())[n]
+                    if model == "1":
+                        budgets[key] = (volume * rate) / 1000
+                    else:
                         budgets[key] = volume * rate
-                        n += 1
+                    n += 1
 
-                table_android.append_column(
-                    "Всего без НДС", [int(spend) for key, spend in budgets.items()])
-                print(table_android)
+            table_ios.append_column("Всего без НДС", [int(spend) for key, spend in budgets.items()])
+            print(table_ios)
 
-                print("\n")
+            print("\n")
 
-                for key, spend in budgets.items():
-                    if spend < BUDGET_BOTTOM[key]:
-                        shortage = BUDGET_BOTTOM[key] - spend
-                        print(
-                            f"🚨  Обрати внимание, что мы не добираем {int(shortage)} до минимального бюджета по {key} для Android!")
-                    else:
-                        pass
-
-            else:
-                pass
-
-            if ios_platform == True:
-                print("\n--- iOS 🍏  ---")
-                table_ios = BeautifulTable()
-                table_ios.append_column(
-                    "Источник", [key for key, value in new_ios_rates.items()])
-                table_ios.append_column(
-                    f"Ставка {models[model]}", [(str(rate)).replace(".", ",") for key, rate in new_ios_rates.items()])
-
-                # Count total volumes for iOS.
-                volumes_all_together = []
-                for month in which_months:
-                    number_of_days_in_month = int(
-                        calendar.monthrange(now.year, month)[1])
-                    if month == 2 or month == 11:
-                        volumes = [int(((volume / 1000) / INCREASE_FEBRUARY_NOVEMBER) * number_of_days_in_month) if model == "1" else int(
-                            (volume / INCREASE_FEBRUARY_NOVEMBER) * number_of_days_in_month) for key, volume in new_ios_volume.items()]
-                        volumes_all_together.append(volumes)
-                        table_ios.append_column(months[month], volumes)
-                    elif month == 12:
-                        volumes = [int(((volume / 1000) / INCREASE_DECEMBER) * number_of_days_in_month) if model == "1" else int(
-                            (volume / INCREASE_DECEMBER) * number_of_days_in_month) for key, volume in new_ios_volume.items()]
-                        volumes_all_together.append(volumes)
-                        table_ios.append_column(months[month], volumes)
-                    else:
-                        volumes = [int((volume / 1000) * number_of_days_in_month) if model == "1" else int(
-                            volume * number_of_days_in_month) for key, volume in new_ios_volume.items()]
-                        volumes_all_together.append(volumes)
-                        table_ios.append_column(months[month], volumes)
-
-                budgets = {}
-                n = 0
-                for volume in numpy.sum(volumes_all_together, axis=0):
-                    if n <= len(new_ios_rates) - 1:
-                        key = list(new_ios_rates.keys())[n]
-                        rate = list(new_ios_rates.values())[n]
-                        budgets[key] = volume * rate
-                        n += 1
-
-                table_ios.append_column("Всего без НДС", [int(
-                    spend) for key, spend in budgets.items()])
-                print(table_ios)
-
-                print("\n")
-
-                for key, spend in budgets.items():
-                    if spend < BUDGET_BOTTOM[key]:
-                        shortage = BUDGET_BOTTOM[key] - spend
-                        print(
-                            f"🚨  Обрати внимание, что мы не добираем {int(shortage)} до минимального бюджета по {key} для iOS!")
-                    else:
-                        pass
-
-            else:
-                pass
+            for key, spend in budgets.items():
+                if spend < BUDGET_BOTTOM[key]:
+                    shortage = BUDGET_BOTTOM[key] - spend
+                    print(
+                        f"🚨  Обрати внимание, что мы не добираем {int(shortage)} до минимального бюджета по {key} для iOS!")
+                else:
+                    pass
+        else:
+            pass
         
 
     def launch_whole_process(self):
