@@ -1,13 +1,13 @@
 # Чтобы использовать эту модель, на компьютере должен быть установлен язык программировани Python, который можно скачать отсюда: https://www.python.org/downloads/
-# Дальше, открываешь приложение "Терминал" в утилитах и переходишь в папку (в самом терминале), в которой лежит файл model.py
-# Чтобы запустить оценку, введи комманду и нажми Enter: python3 model.py
-# Следуй инструкциям и наслаждайся 🥳
+# Дальше, открываешь приложение "Терминал" в утилитах и переходишь в папку (в самом терминале), в которой лежит файл months.py
+# Чтобы запустить оценку, введи комманду и нажми Enter: python3 months.py
+# Следуй инструкциям и наслаждайся 🍹
+
 import re
 import numpy
 import datetime
 import calendar
 from beautifultable import BeautifulTable
-
 
 INCREASE_FOR_CREATIVES = 1.3
 INCREASE_FOR_RATING = 1.1
@@ -20,18 +20,6 @@ INCREASE_FOR_SIZE_OVER_1000 = 1.3
 INCREASE_FEBRUARY_NOVEMBER = 1.3
 INCREASE_DECEMBER = 2
 
-MIN_BUDGET_FACEBOOK = 1500
-MIN_BUDGET_GOOGLE = 1500
-MIN_BUDGET_MYTARGET = 1000
-MIN_BUDGET_INAPP = 1000
-MIN_BUDGET_VIDEONETWORKS = 1500
-MIN_BUDGET_TWITTER = 3000
-MIN_BUDGET_SNAPCHAT = 2000
-MIN_BUDGET_YANDEX = 1000
-MIN_BUDGET_PINTEREST = 1500
-MIN_BUDGET_DSP = 2000
-MIN_BUDGET_ASA = 2000
-
 VOLUME_COEFFICIENTS = {
         "Facebook": 1,
         "Google": 1.17,
@@ -41,7 +29,7 @@ VOLUME_COEFFICIENTS = {
         "Twitter": 0.5,
         "Snapchat": 0.17,
         "Яндекс": 0.67,
-        "DSP": 1.33,
+        "ВКонтакте": 0.67,
         "ASA": 0.5
     }
 
@@ -54,7 +42,7 @@ BUDGET_BOTTOM = {
         "Twitter": 3000,
         "Snapchat": 2000,
         "Яндекс": 1000,
-        "DSP": 2000,
+        "ВКонтакте": 1000,
         "ASA": 2000
     }
 
@@ -70,7 +58,7 @@ class App:
         "Twitter": 1.1,
         "Snapchat": 1,
         "Яндекс": 1,
-        "DSP": 0.9
+        "ВКонтакте": 0.9
     }
 
     ios_rates = {
@@ -82,7 +70,7 @@ class App:
         "Twitter": 1.1,
         "Snapchat": 1,
         "Яндекс": 1,
-        "DSP": 0.9,
+        "ВКонтакте": 0.9,
         "ASA": 1.5
     }
 
@@ -406,16 +394,19 @@ class App:
                 print("\nБудет ли продвижение в СНГ? (да/нет)")
                 cis = input("Ответ по СНГ -> ").lower()
                 if cis == "нет":
-                    cis_sources = ("myTarget", "Яндекс")
+                    cis_sources = ("myTarget", "Яндекс", "ВКонтакте")
                     for key in cis_sources:
                         if key in new_android_rates:
                             new_android_rates.pop(key)
+                            new_android_volume.pop(key)
                         else:
                             pass
                         if key in new_ios_rates:
                             new_ios_rates.pop(key)
+                            new_ios_volume.pop(key)
                         else:
                             pass
+                    # pass
                 elif cis == "да":
                     pass
                 else:
@@ -429,12 +420,15 @@ class App:
                     for key in usa_sources:
                         if key in new_android_rates:
                             new_android_rates.pop(key)
+                            new_android_volume.pop(key)
                         else:
                             pass
                         if key in new_ios_rates:
                             new_ios_rates.pop(key)
+                            new_ios_volume.pop(key)
                         else:
                             pass
+                    # pass
                 elif usa == "да":
                     pass
                 else:
@@ -509,7 +503,6 @@ class App:
                 else:
                     volumes = [int(volume * number_of_days_in_month) for key, volume in new_android_volume.items()]
                     volumes_all_together.append(volumes)
-            # print(f"Here is the \"volumes_all_together\" for Android in preestimation: {volumes_all_together}")
 
             budgets = {}
             n = 0
@@ -544,7 +537,6 @@ class App:
                     volumes = [int(volume * number_of_days_in_month) for key, volume in new_ios_volume.items()]
                     volumes_all_together.append(volumes)
 
-            # print(f"Here is the \"volumes_all_together\" for iOS in preestimation: {volumes_all_together}")
             budgets = {}
             n = 0
             for volume in numpy.sum(volumes_all_together, axis=0):
@@ -596,7 +588,7 @@ class App:
                     table_android.append_column(months[month], volumes)
                 elif month == 12:
                     if difference < 1:
-                        volumes = [int((volume / INCREASE_DECEMBER) * number_of_days_in_month) * difference for key, volume in new_android_volume.items()]
+                        volumes = [int(((volume / INCREASE_DECEMBER) * number_of_days_in_month) * difference) for key, volume in new_android_volume.items()]
                     else:
                         volumes = [int(((volume / 1000) / INCREASE_DECEMBER) * number_of_days_in_month) if model == "1" else int((volume / INCREASE_DECEMBER) * number_of_days_in_month) for key, volume in new_android_volume.items()]
                     volumes_all_together.append(volumes)
@@ -609,7 +601,6 @@ class App:
                     volumes_all_together.append(volumes)
                     table_android.append_column(months[month], volumes)
 
-            # print(f"Here is the \"volumes_all_together\" for Android in estimation: {volumes_all_together}")
             budgets = {}
             n = 0
             for volume in numpy.sum(volumes_all_together, axis=0):
@@ -673,7 +664,6 @@ class App:
                     volumes_all_together.append(volumes)
                     table_ios.append_column(months[month], volumes)
 
-            # print(f"Here is the \"volumes_all_together\" for iOS in estimation: {volumes_all_together}")
             budgets = {}
             n = 0
             for volume in numpy.sum(volumes_all_together, axis=0):
@@ -716,7 +706,7 @@ class Landing:
         "Twitter": 1.4,
         "Snapchat": 1,
         "Яндекс": 1,
-        "DSP": 0.9
+        "ВКонтакте": 0.9
     }
 
     def choose_model(self):
@@ -856,7 +846,7 @@ class Landing:
                 print("\nБудет ли продвижение в СНГ? (да/нет)")
                 cis = input("Ответ по СНГ -> ").lower()
                 if cis == "нет":
-                    cis_sources = ("myTarget", "Яндекс")
+                    cis_sources = ("myTarget", "Яндекс", "ВКонтакте")
                     for key in cis_sources:
                         if key in new_landing_rates:
                             new_landing_rates.pop(key)
