@@ -23,14 +23,14 @@ INCREASE_DECEMBER = 2
 VOLUME_COEFFICIENTS = {
         "Facebook": 1,
         "Google": 1.17,
-        "myTarget": 1.33,
-        "In-App": 1.17,
-        "Видеосети": 0.67,
-        "Twitter": 0.5,
-        "Snapchat": 0.17,
-        "Яндекс": 0.67,
-        "ВКонтакте": 0.67,
-        "ASA": 0.5
+        "myTarget": 1.10,
+        "In-App": 1.23,
+        "Видеосети": 0.93,
+        "Twitter": 0.23,
+        "Snapchat": 0.47,
+        "Яндекс": 0.73,
+        "ВКонтакте": 0.60,
+        "ASA": 0.53
     }
 
 BUDGET_BOTTOM = {
@@ -152,13 +152,13 @@ class App:
 
                     android_volume = float(
                         input("Получившийся объем для Android -> ").replace(",", "."))
-                    new_android_volume = {}
+                    new_android_volumes = {}
                     for key, value in VOLUME_COEFFICIENTS.items():
                         new_value = round((value * android_volume), 2)
-                        new_android_volume[key] = new_value
+                        new_android_volumes[key] = new_value
                 else:
                     new_android_rates = {}
-                    new_android_volume = {}
+                    new_android_volumes = {}
 
                 if ios_platform == True:
                     base_rate_ios = float(
@@ -170,13 +170,13 @@ class App:
 
                     ios_volume = float(
                         input("Получившийся объем для iOS -> ").replace(",", "."))
-                    new_ios_volume = {}
+                    new_ios_volumes = {}
                     for key, value in VOLUME_COEFFICIENTS.items():
                         new_value = round((value * ios_volume), 2)
-                        new_ios_volume[key] = new_value
+                        new_ios_volumes[key] = new_value
                 else:
                     new_ios_rates = {}
-                    new_ios_volume = {}
+                    new_ios_volumes = {}
 
                 if model == "3":
                     for key, value in new_android_rates.items():
@@ -185,16 +185,16 @@ class App:
                     for key, value in new_ios_rates.items():
                         new_ios_rates[key] = round(
                             (value / conversion), 2)
-                    for key, value in new_android_volume.items():
-                        new_android_volume[key] = round(
+                    for key, value in new_android_volumes.items():
+                        new_android_volumes[key] = round(
                             (value * conversion), 2)
-                    for key, value in new_ios_volume.items():
-                        new_ios_volume[key] = round(
+                    for key, value in new_ios_volumes.items():
+                        new_ios_volumes[key] = round(
                             (value * conversion), 2)
                 else:
                     pass
 
-                return new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volume, new_ios_volume
+                return new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volumes, new_ios_volumes
 
             except ValueError:
                 print("Похоже кто-то ошибся с введенным значением. Повторим? 😉")
@@ -203,7 +203,7 @@ class App:
 
     def specify_budget(self):
         # Limited budget may affect futher estimations.
-        new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volume, new_ios_volume = self.start_calculate()
+        new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volumes, new_ios_volumes = self.start_calculate()
         print("\n4) Давай укажем бюджет кампании. Если бюджет неограниченный и считаем по максимуму, тогда жми Enter.")
 
         answer = "".join(input("Бюджет -> "))
@@ -212,11 +212,11 @@ class App:
         else:
             budget = int(answer)
 
-        return new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volume, new_ios_volume, budget
+        return new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volumes, new_ios_volumes, budget
 
     def check_creatives(self):
         # Correct rates due to creatives.
-        new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volume, new_ios_volume, budget = self.specify_budget()
+        new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volumes, new_ios_volumes, budget = self.specify_budget()
         print("\n5) Можем ли мы использовать свои креативы, чтобы повысить конверсию? (да/нет)")
 
         while True:
@@ -236,11 +236,11 @@ class App:
                 print("Похоже кто-то ошибся с ответом. Повторим? 😉")
                 continue
 
-        return new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volume, new_ios_volume, budget
+        return new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volumes, new_ios_volumes, budget
 
     def check_store_rating(self):
         # Correct rates if stores' rating lower than 4.
-        new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volume, new_ios_volume, budget = self.check_creatives()
+        new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volumes, new_ios_volumes, budget = self.check_creatives()
         print("\n6) А как обстоят дела с рейтингом приложения? (например, 4.4)")
 
         while True:
@@ -274,7 +274,7 @@ class App:
                 else:
                     pass
 
-                return new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volume, new_ios_volume, budget
+                return new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volumes, new_ios_volumes, budget
 
             except ValueError:
                 print("Похоже кто-то ошибся с введенным значением. Повторим? 😉")
@@ -282,7 +282,7 @@ class App:
 
     def check_app_size(self):
         # Correct rates according to the sizes mentioned in https://bit.ly/2TpCoF5.
-        new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volume, new_ios_volume, budget = self.check_store_rating()
+        new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volumes, new_ios_volumes, budget = self.check_store_rating()
         print("\n7) Давай укажем размер приложения в мегабайтах? (например, 70)")
 
         while True:
@@ -327,7 +327,7 @@ class App:
                 else:
                     pass
 
-                return new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volume, new_ios_volume, budget
+                return new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volumes, new_ios_volumes, budget
 
             except ValueError:
                 print("Похоже кто-то ошибся с введенным значением. Повторим? 😉")
@@ -335,7 +335,7 @@ class App:
 
     def check_for_push(self):
         # Correct rates if it's a push-campaign.
-        new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volume, new_ios_volume, budget = self.check_app_size()
+        new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volumes, new_ios_volumes, budget = self.check_app_size()
         print("\n8) Это будет push-кампания (вывод нового продукта в ТОП за месяц) или нет? (да/нет)")
 
         while True:
@@ -349,11 +349,11 @@ class App:
                         (value * INCREASE_FOR_PUSH), 2)
                 for key, value in new_ios_rates.items():
                     new_ios_rates[key] = round((value * INCREASE_FOR_PUSH), 2)
-                for key, value in new_android_volume.items():
-                    new_android_volume[key] = round(
+                for key, value in new_android_volumes.items():
+                    new_android_volumes[key] = round(
                         (value * INCREASE_FOR_PUSH_VOLUME), 2)
-                for key, value in new_ios_volume.items():
-                    new_ios_volume[key] = round(
+                for key, value in new_ios_volumes.items():
+                    new_ios_volumes[key] = round(
                         (value * INCREASE_FOR_PUSH_VOLUME), 2)
             elif push == "нет":
                 print(
@@ -362,11 +362,11 @@ class App:
                 print("Похоже кто-то ошибся с ответом. Повторим? 😉")
                 continue
 
-            return new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volume, new_ios_volume, budget
+            return new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volumes, new_ios_volumes, budget
 
     def consider_period(self):
         # Correct rates if the start is on high season.
-        new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volume, new_ios_volume, budget = self.check_for_push()
+        new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volumes, new_ios_volumes, budget = self.check_for_push()
         print("\n9) Укажи номера месяцев, в которые будем продвигаться. Например: 3, 4, 5")
         print("Январь – 1\nФевраль – 2\nМарт – 3\nАпрель – 4\nМай – 5\nИюнь – 6\nИюль – 7\nАвгуст – 8\nСентябрь – 9\nОктябрь – 10\nНоябрь – 11\nДекабрь – 12")
 
@@ -375,7 +375,7 @@ class App:
                 months = input("Ответ -> ")
                 which_months = list(map(int, re.findall('\\b\\d+\\b', months)))
 
-                return new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volume, new_ios_volume, which_months, budget
+                return new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volumes, new_ios_volumes, which_months, budget
 
             except ValueError:
                 print("Похоже кто-то ошибся с введенным значением. Повторим? 😉")
@@ -383,7 +383,7 @@ class App:
 
     def check_regions(self):
         # Exclude sources that are not relevant to targeting.
-        new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volume, new_ios_volume, which_months, budget = self.consider_period()
+        new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volumes, new_ios_volumes, which_months, budget = self.consider_period()
         print("\n10) Будет ли продвижение WW? (да/нет)")
 
         while True:
@@ -398,15 +398,14 @@ class App:
                     for key in cis_sources:
                         if key in new_android_rates:
                             new_android_rates.pop(key)
-                            new_android_volume.pop(key)
+                            new_android_volumes.pop(key)
                         else:
                             pass
                         if key in new_ios_rates:
                             new_ios_rates.pop(key)
-                            new_ios_volume.pop(key)
+                            new_ios_volumes.pop(key)
                         else:
                             pass
-                    # pass
                 elif cis == "да":
                     pass
                 else:
@@ -420,15 +419,14 @@ class App:
                     for key in usa_sources:
                         if key in new_android_rates:
                             new_android_rates.pop(key)
-                            new_android_volume.pop(key)
+                            new_android_volumes.pop(key)
                         else:
                             pass
                         if key in new_ios_rates:
                             new_ios_rates.pop(key)
-                            new_ios_volume.pop(key)
+                            new_ios_volumes.pop(key)
                         else:
                             pass
-                    # pass
                 elif usa == "да":
                     pass
                 else:
@@ -441,11 +439,11 @@ class App:
                 print("Похоже кто-то ошибся с ответом. Повторим? 😉")
                 continue
 
-            return new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volume, new_ios_volume, which_months, budget
+            return new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volumes, new_ios_volumes, which_months, budget
 
     def choose_tracker(self):
         # Correct sources if they are limited by tracking system.
-        new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volume, new_ios_volume, which_months, budget = self.check_regions()
+        new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volumes, new_ios_volumes, which_months, budget = self.check_regions()
         print("\n11) Рекламодатель будет использовать треккинговую систему AppsFlyer, Adjust, Kochava или Tune? (да/нет)?")
 
         while True:
@@ -459,11 +457,11 @@ class App:
                 print("Похоже кто-то ошибся с ответом. Повторим? 😉")
                 continue
 
-            return new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volume, new_ios_volume, which_months, budget
+            return new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volumes, new_ios_volumes, which_months, budget
 
     def show_results(self):
         # This is the final step of estimation.
-        new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volume, new_ios_volume, which_months, budget = self.choose_tracker()
+        new_android_rates, new_ios_rates, model, android_platform, ios_platform, new_android_volumes, new_ios_volumes, which_months, budget = self.choose_tracker()
 
         models = {
             "1": "CPM",
@@ -495,13 +493,13 @@ class App:
                 number_of_days_in_month = int(
                     calendar.monthrange(now.year, month)[1])
                 if month == 2 or month == 11:
-                    volumes = [int((volume / INCREASE_FEBRUARY_NOVEMBER) * number_of_days_in_month) for key, volume in new_android_volume.items()]
+                    volumes = [int((volume / INCREASE_FEBRUARY_NOVEMBER) * number_of_days_in_month) for key, volume in new_android_volumes.items()]
                     volumes_all_together.append(volumes)
                 elif month == 12:
-                    volumes = [int((volume / INCREASE_DECEMBER) * number_of_days_in_month) for key, volume in new_android_volume.items()]
+                    volumes = [int((volume / INCREASE_DECEMBER) * number_of_days_in_month) for key, volume in new_android_volumes.items()]
                     volumes_all_together.append(volumes)
                 else:
-                    volumes = [int(volume * number_of_days_in_month) for key, volume in new_android_volume.items()]
+                    volumes = [int(volume * number_of_days_in_month) for key, volume in new_android_volumes.items()]
                     volumes_all_together.append(volumes)
 
             budgets = {}
@@ -528,13 +526,13 @@ class App:
                 number_of_days_in_month = int(
                     calendar.monthrange(now.year, month)[1])
                 if month == 2 or month == 11:
-                    volumes = [int((volume / INCREASE_FEBRUARY_NOVEMBER) * number_of_days_in_month) for key, volume in new_ios_volume.items()]
+                    volumes = [int((volume / INCREASE_FEBRUARY_NOVEMBER) * number_of_days_in_month) for key, volume in new_ios_volumes.items()]
                     volumes_all_together.append(volumes)
                 elif month == 12:
-                    volumes = [int((volume / INCREASE_DECEMBER) * number_of_days_in_month) for key, volume in new_ios_volume.items()]
+                    volumes = [int((volume / INCREASE_DECEMBER) * number_of_days_in_month) for key, volume in new_ios_volumes.items()]
                     volumes_all_together.append(volumes)
                 else:
-                    volumes = [int(volume * number_of_days_in_month) for key, volume in new_ios_volume.items()]
+                    volumes = [int(volume * number_of_days_in_month) for key, volume in new_ios_volumes.items()]
                     volumes_all_together.append(volumes)
 
             budgets = {}
@@ -581,23 +579,23 @@ class App:
                     calendar.monthrange(now.year, month)[1])
                 if month == 2 or month == 11:
                     if difference < 1:
-                        volumes = [int(((volume / INCREASE_FEBRUARY_NOVEMBER) * number_of_days_in_month) * difference) for key, volume in new_android_volume.items()]
+                        volumes = [int(((volume / INCREASE_FEBRUARY_NOVEMBER) * number_of_days_in_month) * difference) for key, volume in new_android_volumes.items()]
                     else:
-                        volumes = [int(((volume / 1000) / INCREASE_FEBRUARY_NOVEMBER) * number_of_days_in_month) if model == "1" else int((volume / INCREASE_FEBRUARY_NOVEMBER) * number_of_days_in_month) for key, volume in new_android_volume.items()]
+                        volumes = [int(((volume / 1000) / INCREASE_FEBRUARY_NOVEMBER) * number_of_days_in_month) if model == "1" else int((volume / INCREASE_FEBRUARY_NOVEMBER) * number_of_days_in_month) for key, volume in new_android_volumes.items()]
                     volumes_all_together.append(volumes)
                     table_android.append_column(months[month], volumes)
                 elif month == 12:
                     if difference < 1:
-                        volumes = [int(((volume / INCREASE_DECEMBER) * number_of_days_in_month) * difference) for key, volume in new_android_volume.items()]
+                        volumes = [int(((volume / INCREASE_DECEMBER) * number_of_days_in_month) * difference) for key, volume in new_android_volumes.items()]
                     else:
-                        volumes = [int(((volume / 1000) / INCREASE_DECEMBER) * number_of_days_in_month) if model == "1" else int((volume / INCREASE_DECEMBER) * number_of_days_in_month) for key, volume in new_android_volume.items()]
+                        volumes = [int(((volume / 1000) / INCREASE_DECEMBER) * number_of_days_in_month) if model == "1" else int((volume / INCREASE_DECEMBER) * number_of_days_in_month) for key, volume in new_android_volumes.items()]
                     volumes_all_together.append(volumes)
                     table_android.append_column(months[month], volumes)
                 else:
                     if difference < 1:
-                        volumes = [int((volume * number_of_days_in_month) * difference) for key, volume in new_android_volume.items()]
+                        volumes = [int((volume * number_of_days_in_month) * difference) for key, volume in new_android_volumes.items()]
                     else:
-                        volumes = [int((volume / 1000) * number_of_days_in_month) if model == "1" else int(volume * number_of_days_in_month) for key, volume in new_android_volume.items()]
+                        volumes = [int((volume / 1000) * number_of_days_in_month) if model == "1" else int(volume * number_of_days_in_month) for key, volume in new_android_volumes.items()]
                     volumes_all_together.append(volumes)
                     table_android.append_column(months[month], volumes)
 
@@ -644,23 +642,23 @@ class App:
                     calendar.monthrange(now.year, month)[1])
                 if month == 2 or month == 11:
                     if difference < 1:
-                        volumes = [int(((volume / INCREASE_FEBRUARY_NOVEMBER) * number_of_days_in_month) * difference) for key, volume in new_ios_volume.items()]
+                        volumes = [int(((volume / INCREASE_FEBRUARY_NOVEMBER) * number_of_days_in_month) * difference) for key, volume in new_ios_volumes.items()]
                     else:
-                        volumes = [int(((volume / 1000) / INCREASE_FEBRUARY_NOVEMBER) * number_of_days_in_month) if model == "1" else int((volume / INCREASE_FEBRUARY_NOVEMBER) * number_of_days_in_month) for key, volume in new_ios_volume.items()]
+                        volumes = [int(((volume / 1000) / INCREASE_FEBRUARY_NOVEMBER) * number_of_days_in_month) if model == "1" else int((volume / INCREASE_FEBRUARY_NOVEMBER) * number_of_days_in_month) for key, volume in new_ios_volumes.items()]
                     volumes_all_together.append(volumes)
                     table_ios.append_column(months[month], volumes)
                 elif month == 12:
                     if difference < 1:
-                        volumes = [int(((volume / INCREASE_DECEMBER) * number_of_days_in_month) * difference) for key, volume in new_ios_volume.items()]
+                        volumes = [int(((volume / INCREASE_DECEMBER) * number_of_days_in_month) * difference) for key, volume in new_ios_volumes.items()]
                     else:
-                        volumes = [int(((volume / 1000) / INCREASE_DECEMBER) * number_of_days_in_month) if model == "1" else int((volume / INCREASE_DECEMBER) * number_of_days_in_month) for key, volume in new_ios_volume.items()]
+                        volumes = [int(((volume / 1000) / INCREASE_DECEMBER) * number_of_days_in_month) if model == "1" else int((volume / INCREASE_DECEMBER) * number_of_days_in_month) for key, volume in new_ios_volumes.items()]
                     volumes_all_together.append(volumes)
                     table_ios.append_column(months[month], volumes)
                 else:
                     if difference < 1:
-                        volumes = [int((volume * number_of_days_in_month) * difference) for key, volume in new_ios_volume.items()]
+                        volumes = [int((volume * number_of_days_in_month) * difference) for key, volume in new_ios_volumes.items()]
                     else:
-                        volumes = [int((volume / 1000) * number_of_days_in_month) if model == "1" else int(volume * number_of_days_in_month) for key, volume in new_ios_volume.items()]
+                        volumes = [int((volume / 1000) * number_of_days_in_month) if model == "1" else int(volume * number_of_days_in_month) for key, volume in new_ios_volumes.items()]
                     volumes_all_together.append(volumes)
                     table_ios.append_column(months[month], volumes)
 
@@ -743,10 +741,10 @@ class Landing:
 
                 landing_volume = float(
                         input("Получившийся объем-> ").replace(",", "."))
-                new_landing_volume = {}
+                new_landing_volumes = {}
                 for key, value in VOLUME_COEFFICIENTS.items():
                     new_value = round((value * landing_volume), 2)
-                    new_landing_volume[key] = new_value
+                    new_landing_volumes[key] = new_value
 
                 if model == "1":
                     pass
@@ -758,14 +756,14 @@ class Landing:
                     for key, value in new_landing_rates.items():
                         new_landing_rates[key] = round(
                             (value / conversion), 2)
-                    for key, value in new_landing_volume.items():
-                        new_landing_volume[key] = round(
+                    for key, value in new_landing_volumes.items():
+                        new_landing_volumes[key] = round(
                             (value * conversion), 2)
                 else:
                     print("Указанная модель – это точно одна из CPM, CPC или CPA?")
                     continue
 
-                return new_landing_rates, new_landing_volume, model
+                return new_landing_rates, new_landing_volumes, model
 
             except ValueError:
                 print("Похоже кто-то ошибся с введенным значением. Повторим? 😉")
@@ -773,7 +771,7 @@ class Landing:
 
     def check_creatives(self):
         # Correct rates due to creatives.
-        new_landing_rates, new_landing_volume, model = self.start_calculate()
+        new_landing_rates, new_landing_volumes, model = self.start_calculate()
         print("\n3) Можем ли мы использовать свои креативы, чтобы повысить конверсию? (да/нет)")
 
         while True:
@@ -788,11 +786,11 @@ class Landing:
                 print("Похоже кто-то ошибся с ответом. Повторим? 😉")
                 continue
 
-            return new_landing_rates, new_landing_volume, model
+            return new_landing_rates, new_landing_volumes, model
 
     def check_for_push(self):
         # Correct rates if it's a push-campaign.
-        new_landing_rates, new_landing_volume, model = self.check_creatives()
+        new_landing_rates, new_landing_volumes, model = self.check_creatives()
         print("\n4) Это будет push-кампания (вывод нового продукта в ТОП за месяц) или нет? (да/нет)")
 
         while True:
@@ -804,8 +802,8 @@ class Landing:
                 for key, value in new_landing_rates.items():
                     new_landing_rates[key] = round(
                         (value * INCREASE_FOR_PUSH), 2)
-                for key, value in new_landing_volume.items():
-                    new_landing_volume[key] = round(
+                for key, value in new_landing_volumes.items():
+                    new_landing_volumes[key] = round(
                         (value * INCREASE_FOR_PUSH_VOLUME), 2)
             elif push == "нет":
                 print(
@@ -814,11 +812,11 @@ class Landing:
                 print("Похоже кто-то ошибся с ответом. Повторим? 😉")
                 continue
 
-            return new_landing_rates, new_landing_volume, model
+            return new_landing_rates, new_landing_volumes, model
 
     def consider_period(self):
         # Correct rates if the start is on high season.
-        new_landing_rates, new_landing_volume, model = self.check_for_push()
+        new_landing_rates, new_landing_volumes, model = self.check_for_push()
         print("\n5) Укажи номера месяцев, в которые будем продвигаться. Например: 3, 4, 5")
         print("Январь – 1\nФевраль – 2\nМарт – 3\nАпрель – 4\nМай – 5\nИюнь – 6\nИюль – 7\nАвгуст – 8\nСентябрь – 9\nОктябрь – 10\nНоябрь – 11\nДекабрь – 12")
 
@@ -827,7 +825,7 @@ class Landing:
                 months = input("Ответ -> ")
                 which_months = list(map(int, re.findall('\\b\\d+\\b', months)))
 
-                return new_landing_rates, new_landing_volume, model, which_months
+                return new_landing_rates, new_landing_volumes, model, which_months
 
             except ValueError:
                 print("Похоже кто-то ошибся с введенным значением. Повторим? 😉")
@@ -835,7 +833,7 @@ class Landing:
 
     def check_regions(self):
         # Exclude sources that are not relevant to targeting.
-        new_landing_rates, new_landing_volume, model, which_months = self.consider_period()
+        new_landing_rates, new_landing_volumes, model, which_months = self.consider_period()
         print("\n6) Будет ли продвижение WW? (да/нет)")
 
         while True:
@@ -850,6 +848,7 @@ class Landing:
                     for key in cis_sources:
                         if key in new_landing_rates:
                             new_landing_rates.pop(key)
+                            new_landing_volumes.pop(key)
                         else:
                             pass
                 elif cis == "да":
@@ -865,6 +864,7 @@ class Landing:
                     for key in usa_sources:
                         if key in new_landing_rates:
                             new_landing_rates.pop(key)
+                            new_landing_volumes.pop(key)
                         else:
                             pass
                 elif usa == "да":
@@ -879,11 +879,11 @@ class Landing:
                 print("Похоже кто-то ошибся с ответом. Повторим? 😉")
                 continue
 
-            return new_landing_rates, new_landing_volume, model, which_months
+            return new_landing_rates, new_landing_volumes, model, which_months
 
     def show_results(self):
         # This is the final step of estimation.
-        new_landing_rates, new_landing_volume, model, which_months = self.check_regions()
+        new_landing_rates, new_landing_volumes, model, which_months = self.check_regions()
 
         models = {
             "1": "CPM",
@@ -921,15 +921,15 @@ class Landing:
         for month in which_months:
             number_of_days_in_month = int(calendar.monthrange(now.year, month)[1])
             if month == 2 or month == 11:
-                volumes = [int(((volume / 1000) / INCREASE_FEBRUARY_NOVEMBER) * number_of_days_in_month) if model == "1" else int((volume / INCREASE_FEBRUARY_NOVEMBER) * number_of_days_in_month) for key, volume in new_landing_volume.items()]
+                volumes = [int(((volume / 1000) / INCREASE_FEBRUARY_NOVEMBER) * number_of_days_in_month) if model == "1" else int((volume / INCREASE_FEBRUARY_NOVEMBER) * number_of_days_in_month) for key, volume in new_landing_volumes.items()]
                 volumes_all_together.append(volumes)
                 table_landing.append_column(months[month], volumes)
             elif month == 12:
-                volumes = [int(((volume / 1000) / INCREASE_DECEMBER) * number_of_days_in_month) if model == "1" else int((volume / INCREASE_DECEMBER) * number_of_days_in_month) for key, volume in new_landing_volume.items()]
+                volumes = [int(((volume / 1000) / INCREASE_DECEMBER) * number_of_days_in_month) if model == "1" else int((volume / INCREASE_DECEMBER) * number_of_days_in_month) for key, volume in new_landing_volumes.items()]
                 volumes_all_together.append(volumes)
                 table_landing.append_column(months[month], volumes)
             else:
-                volumes = [int((volume / 1000) * number_of_days_in_month) if model == "1" else int(volume * number_of_days_in_month) for key, volume in new_landing_volume.items()]
+                volumes = [int((volume / 1000) * number_of_days_in_month) if model == "1" else int(volume * number_of_days_in_month) for key, volume in new_landing_volumes.items()]
                 volumes_all_together.append(volumes)
                 table_landing.append_column(months[month], volumes)
 
