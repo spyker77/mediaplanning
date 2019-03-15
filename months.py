@@ -52,11 +52,11 @@ class App:
     android_rates = {
         "Facebook": 1,
         "Google": 1,
-        "myTarget": 0.9,
+        "myTarget": 0.95,
         "In-App": 0.9,
-        "Видеосети": 1.1,
+        "Видеосети": 1.15,
         "Twitter": 1.1,
-        "Snapchat": 1,
+        "Snapchat": 0.95,
         "Яндекс": 1,
         "ВКонтакте": 0.9
     }
@@ -64,11 +64,11 @@ class App:
     ios_rates = {
         "Facebook": 1,
         "Google": 1.07,
-        "myTarget": 0.9,
+        "myTarget": 0.95,
         "In-App": 0.9,
-        "Видеосети": 1.1,
+        "Видеосети": 1.15,
         "Twitter": 1.1,
-        "Snapchat": 1,
+        "Snapchat": 0.95,
         "Яндекс": 1,
         "ВКонтакте": 0.9,
         "ASA": 1.5
@@ -700,9 +700,9 @@ class Landing:
     landing_rates = {
         "Facebook": 1,
         "Google": 1,
-        "myTarget": 0.9,
-        "Twitter": 1.4,
-        "Snapchat": 1,
+        "myTarget": 0.95,
+        "Twitter": 1.1,
+        "Snapchat": 0.95,
         "Яндекс": 1,
         "ВКонтакте": 0.9
     }
